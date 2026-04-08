@@ -69,6 +69,18 @@
       line-height: 1;
     }
 
+    /* ── VERSION ── */
+    #version {
+      position: fixed;
+      top: 12px;
+      left: 14px;
+      font-size: 0.55rem;
+      letter-spacing: 0.12em;
+      opacity: 0.25;
+      z-index: 999;
+      pointer-events: none;
+    }
+
     /* ── HERO FADE IN ── */
     .hero {
       opacity: 0;
@@ -225,29 +237,6 @@
       letter-spacing: 0.14em;
       opacity: 0.28;
       z-index: 3;
-    }
-
-    /* ── SECTION LABEL ── */
-    .label-row {
-      padding: 14px 48px;
-      border-bottom: 1px solid var(--border);
-      display: flex;
-      align-items: center;
-      gap: 24px;
-    }
-
-    .label-row span {
-      font-size: 0.6rem;
-      letter-spacing: 0.22em;
-      text-transform: uppercase;
-      opacity: 0.25;
-      white-space: nowrap;
-    }
-
-    .label-row .rule {
-      flex: 1;
-      height: 1px;
-      background: var(--border);
     }
 
     /* ── SEE ALL ── */
@@ -441,7 +430,7 @@
 
     /* ── RESPONSIVE ── */
     @media (max-width: 680px) {
-      .hero { padding: 24px 24px 32px; }
+      .hero { padding: 24px 24px 32px; height: 100dvh; }
       .row.split, .row.trio { flex-direction: column; }
       .row.split .slot, .row.trio .slot { height: 60vw; border-left: none !important; border-top: 1px solid var(--border); }
       .row.full .slot { height: 75vw; }
@@ -451,6 +440,8 @@
   </style>
 </head>
 <body>
+
+  <div id="version">v1</div>
 
   <!-- ── HERO ── -->
   <section class="hero">
@@ -492,11 +483,6 @@
       </div>
     </div>
 
-    <div class="label-row">
-      <span>Selected Works</span>
-      <div class="rule"></div>
-    </div>
-
     <!-- 05 + 06 + 07 trio -->
     <div class="row trio">
       <div class="slot" data-index="5">
@@ -523,11 +509,6 @@
         <img src="photo/photo-09.png" alt="">
         <span class="num">09</span>
       </div>
-    </div>
-
-    <div class="label-row">
-      <span>Portfolio</span>
-      <div class="rule"></div>
     </div>
 
     <!-- 10 + 11 + 12 trio -->
