@@ -431,6 +431,8 @@
     /* ── RESPONSIVE ── */
     @media (max-width: 680px) {
       .hero { padding: 24px 24px 32px; height: 100dvh; }
+      .dash { display: none; }
+      .location { display: block; }
       .row.split, .row.trio { flex-direction: column; }
       .row.split .slot, .row.trio .slot { height: 60vw; border-left: none !important; border-top: 1px solid var(--border); }
       .row.full .slot { height: 75vw; }
@@ -446,7 +448,7 @@
   <!-- ── HERO ── -->
   <section class="hero">
     <div class="hero-top">
-      <span class="hero-tag">Zachary Moller — CT Photographer</span>
+      <span class="hero-tag"><span class="name">Zachary Moller</span><span class="dash"> — </span><span class="location">CT Photographer</span></span>
       <a class="hero-book" href="#book">Book</a>
     </div>
 
