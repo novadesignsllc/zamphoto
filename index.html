@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ZAM Photo</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:     #000;
+      --fg:     #fff;
+      --dim:    rgba(255,255,255,0.22);
+      --border: #2e2e2e;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--fg);
+      font-family: system-ui, -apple-system, sans-serif;
+      overflow-x: hidden;
+    }
+
+    /* ── HERO ── */
+    .hero {
+      height: 100vh;
+      min-height: 600px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 36px 48px 48px;
+      border-bottom: 1px solid var(--border);
+      position: relative;
+    }
+
+    .hero-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+    }
+
+    .hero-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+    }
+
+    .hero-tag {
+      font-size: 0.65rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      opacity: 0.35;
+    }
+
+    .hero-book {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: #fff;
+      color: #000;
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      text-decoration: none;
+      padding: 10px 18px;
+      line-height: 1;
+    }
+
+    /* ── HERO FADE IN ── */
+    .hero {
+      opacity: 0;
+      transition: opacity 1s ease;
+    }
+    .hero.visible { opacity: 1; }
+
+    .hero-top,
+    .hero-title {
+      opacity: 0;
+      transform: translateY(12px);
+      transition: opacity 0.8s ease, transform 0.8s ease;
+    }
+    .hero.visible .hero-top  { opacity: 1; transform: translateY(0); transition-delay: 0.2s; }
+    .hero.visible .hero-title { opacity: 1; transform: translateY(0); transition-delay: 0.4s; }
+
+    .hero-title {
+      font-size: clamp(4.5rem, 14vw, 13rem);
+      font-weight: 800;
+      line-height: 0.88;
+      letter-spacing: -0.04em;
+      text-transform: uppercase;
+      white-space: pre;
+    }
+
+    .hero-bottom {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+    }
+
+    .hero-scroll-txt {
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      opacity: 0;
+      padding-bottom: 0.3em;
+      transition: opacity 0.6s ease;
+      animation: none;
+    }
+
+    .hero-scroll-txt.visible {
+      opacity: 0.4;
+      animation: bounce 1.4s ease-in-out infinite;
+    }
+
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50%       { transform: translateY(-6px); }
+    }
+
+    /* blinking cursor */
+    .cursor {
+      display: inline-block;
+      width: 0.06em;
+      height: 0.85em;
+      background: var(--fg);
+      margin-left: 0.04em;
+      vertical-align: baseline;
+      position: relative;
+      top: 0.05em;
+      animation: blink 0.75s step-end infinite;
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50%       { opacity: 0; }
+    }
+
+    .hero-bottom {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+    }
+
+    .hero-scroll {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      opacity: 0.3;
+      font-size: 0.65rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+    }
+
+    .hero-scroll .arrow {
+      display: inline-block;
+      animation: bob 2s ease-in-out infinite;
+    }
+
+    @keyframes bob {
+      0%, 100% { transform: translateY(0); }
+      50%       { transform: translateY(6px); }
+    }
+
+    /* ── PHOTO SECTIONS ── */
+    .photos {
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Each row is a distinct section */
+    .row {
+      display: flex;
+      border-bottom: 1px solid var(--border);
+    }
+
+    /* layout variants */
+    .row.split  { flex-direction: row; }
+    .row.trio   { flex-direction: row; }
+
+    /* individual photo slot */
+    .slot {
+      flex: 1;
+      overflow: hidden;
+      position: relative;
+      cursor: default;
+    }
+
+    /* height control per row type */
+    .row.split .slot { height: 58vh; }
+    .row.trio  .slot { height: 46vh; }
+
+    /* fixed widths for asymmetric splits */
+    .row.split .slot.wide { flex: 1.6; }
+    .row.split .slot.narrow { flex: 1; border-left: 1px solid var(--border); }
+
+    .row.trio .slot + .slot { border-left: 1px solid var(--border); }
+
+    /* ── FADE IN ── */
+    .slot {
+      opacity: 0;
+      transition: opacity 1s ease;
+    }
+
+    .slot.revealed { opacity: 1; }
+
+    /* ── IMAGE ── */
+    .slot img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+
+    /* ── NUMBER BADGE ── */
+    .num {
+      position: absolute;
+      bottom: 18px;
+      right: 20px;
+      font-size: 0.55rem;
+      letter-spacing: 0.14em;
+      opacity: 0.28;
+      z-index: 3;
+    }
+
+    /* ── SECTION LABEL ── */
+    .label-row {
+      padding: 14px 48px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 24px;
+    }
+
+    .label-row span {
+      font-size: 0.6rem;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      opacity: 0.25;
+      white-space: nowrap;
+    }
+
+    .label-row .rule {
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    /* ── SEE ALL ── */
+    .see-all {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      padding: 48px;
+      border-top: 1px solid var(--border);
+      font-size: clamp(1rem, 2.5vw, 1.6rem);
+      font-weight: 700;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--fg);
+      text-decoration: none;
+      transition: background 0.25s, color 0.25s;
+    }
+
+    .see-all:hover {
+      background: var(--fg);
+      color: var(--bg);
+    }
+
+    /* ── BOOK A CALL ── */
+    .book {
+      border-top: 1px solid var(--border);
+      padding: 100px 48px;
+    }
+
+    .book-inner {
+      display: flex;
+      flex-direction: column;
+      gap: 48px;
+    }
+
+    .book-label {
+      font-size: 0.6rem;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      opacity: 0.3;
+      display: block;
+      margin-bottom: 20px;
+    }
+
+    .book-title {
+      font-size: clamp(2.5rem, 5vw, 4.5rem);
+      font-weight: 800;
+      letter-spacing: -0.04em;
+      text-transform: uppercase;
+      line-height: 0.92;
+    }
+
+    .book-form {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: auto auto auto;
+      border-top: 1px solid var(--border);
+    }
+
+    .field {
+      padding: 24px 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .field:nth-child(odd) { padding-right: 40px; border-right: 1px solid var(--border); }
+    .field:nth-child(even) { padding-left: 40px; }
+
+
+    .field > label {
+      display: block;
+      font-size: 0.58rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      opacity: 0.35;
+      margin-bottom: 10px;
+    }
+
+    .field input[type="text"],
+    .field input[type="tel"] {
+      background: none;
+      border: none;
+      outline: none;
+      color: var(--fg);
+      font-family: inherit;
+      font-size: 1rem;
+      width: 100%;
+      padding: 0;
+    }
+
+    .field input::placeholder { opacity: 0.35; }
+
+    .budget-options {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .opt-group {
+      display: flex;
+      gap: 8px;
+      flex-wrap: nowrap;
+    }
+
+    .opt {
+      display: flex;
+      cursor: pointer;
+    }
+
+    .opt input[type="radio"] { display: none; }
+
+    .opt span {
+      font-size: 0.7rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      border: 1px solid var(--border);
+      padding: 7px 14px;
+      transition: background 0.2s, color 0.2s, border-color 0.2s;
+    }
+
+    .opt input:checked + span {
+      background: var(--fg);
+      color: var(--bg);
+      border-color: var(--fg);
+    }
+
+    .book-submit {
+      background: var(--fg);
+      color: var(--bg);
+      border: none;
+      font-family: inherit;
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      padding: 18px 36px;
+      cursor: pointer;
+      align-self: flex-start;
+      transition: opacity 0.2s;
+      margin-top: 28px;
+    }
+
+    .book-submit:hover { opacity: 0.8; }
+
+    @media (max-width: 700px) {
+      .book { padding: 60px 24px; }
+      .book-form { grid-template-columns: 1fr; }
+      .book-form .field:nth-child(odd) { padding-right: 0; border-right: none; }
+      .book-form .field:nth-child(even) { padding-left: 0; }
+      .book-submit { grid-column: span 1; }
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 64px 48px;
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+    }
+
+    .footer-logo {
+      font-size: clamp(2.5rem, 7vw, 6rem);
+      font-weight: 800;
+      letter-spacing: -0.04em;
+      text-transform: uppercase;
+      line-height: 1;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.9s ease, transform 0.9s ease;
+    }
+
+    .footer-logo.visible { opacity: 1; transform: translateY(0); }
+
+    .footer-right {
+      text-align: right;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.9s ease 0.15s, transform 0.9s ease 0.15s;
+    }
+
+    .footer-right.visible { opacity: 1; transform: translateY(0); }
+
+    .footer-right p {
+      font-size: 0.6rem;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      opacity: 0.3;
+      line-height: 2;
+    }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 680px) {
+      .hero { padding: 24px 24px 32px; }
+      .row.split, .row.trio { flex-direction: column; }
+      .row.split .slot, .row.trio .slot { height: 60vw; border-left: none !important; border-top: 1px solid var(--border); }
+      .row.full .slot { height: 75vw; }
+      .label-row { padding: 12px 24px; }
+      footer { padding: 40px 24px; flex-direction: column; gap: 24px; align-items: flex-start; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ── HERO ── -->
+  <section class="hero">
+    <div class="hero-top">
+      <span class="hero-tag">Zachary Moller — CT Photographer</span>
+      <a class="hero-book" href="#book">Book</a>
+    </div>
+
+    <div class="hero-bottom">
+      <h1 class="hero-title"><span id="typed"></span><span class="cursor"></span></h1>
+      <span class="hero-scroll-txt" id="scrollTxt">Scroll ↓</span>
+    </div>
+  </section>
+
+  <!-- ── PHOTOS ── -->
+  <main class="photos">
+
+    <!-- 01 + 02 split -->
+    <div class="row split">
+      <div class="slot wide" data-index="1">
+        <img src="photo/photo-01.png" alt="">
+        <span class="num">01</span>
+      </div>
+      <div class="slot narrow" data-index="2">
+        <img src="photo/photo-02.png" alt="">
+        <span class="num">02</span>
+      </div>
+    </div>
+
+    <!-- 03 + 04 split reversed -->
+    <div class="row split">
+      <div class="slot narrow" data-index="3">
+        <img src="photo/photo-03.png" alt="">
+        <span class="num">03</span>
+      </div>
+      <div class="slot wide" data-index="4" style="border-left:1px solid var(--border)">
+        <img src="photo/photo-04.png" alt="">
+        <span class="num">04</span>
+      </div>
+    </div>
+
+    <div class="label-row">
+      <span>Selected Works</span>
+      <div class="rule"></div>
+    </div>
+
+    <!-- 05 + 06 + 07 trio -->
+    <div class="row trio">
+      <div class="slot" data-index="5">
+        <img src="photo/photo-05.png" alt="">
+        <span class="num">05</span>
+      </div>
+      <div class="slot" data-index="6">
+        <img src="photo/photo-06.png" alt="">
+        <span class="num">06</span>
+      </div>
+      <div class="slot" data-index="7">
+        <img src="photo/photo-07.png" alt="">
+        <span class="num">07</span>
+      </div>
+    </div>
+
+    <!-- 08 + 09 split -->
+    <div class="row split">
+      <div class="slot wide" data-index="8">
+        <img src="photo/photo-08.png" alt="">
+        <span class="num">08</span>
+      </div>
+      <div class="slot narrow" data-index="9">
+        <img src="photo/photo-09.png" alt="">
+        <span class="num">09</span>
+      </div>
+    </div>
+
+    <div class="label-row">
+      <span>Portfolio</span>
+      <div class="rule"></div>
+    </div>
+
+    <!-- 10 + 11 + 12 trio -->
+    <div class="row trio">
+      <div class="slot" data-index="10">
+        <img src="photo/photo-10.png" alt="">
+        <span class="num">10</span>
+      </div>
+      <div class="slot" data-index="11">
+        <img src="photo/photo-11.png" alt="">
+        <span class="num">11</span>
+      </div>
+      <div class="slot" data-index="12">
+        <img src="photo/photo-12.png" alt="">
+        <span class="num">12</span>
+      </div>
+    </div>
+
+    <!-- 13 + 14 split -->
+    <div class="row split">
+      <div class="slot narrow" data-index="13">
+        <img src="photo/photo-13.png" alt="">
+        <span class="num">13</span>
+      </div>
+      <div class="slot wide" data-index="14" style="border-left:1px solid var(--border)">
+        <img src="photo/photo-14.png" alt="">
+        <span class="num">14</span>
+      </div>
+    </div>
+
+    <a href="https://www.instagram.com/zam_photo_/" target="_blank" rel="noopener" class="see-all">See All My Work Here</a>
+
+  </main>
+
+  <!-- ── BOOK A CALL ── -->
+  <section class="book" id="book">
+    <div class="book-inner">
+      <div class="book-header">
+        <span class="book-label">Book a Call</span>
+        <h2 class="book-title">Let's work<br>together</h2>
+      </div>
+      <form class="book-form" onsubmit="return false;">
+        <div class="field">
+          <label for="f-name">Name</label>
+          <input id="f-name" type="text" placeholder="Your name" autocomplete="off">
+        </div>
+        <div class="field">
+          <label for="f-phone">Cell Phone</label>
+          <input id="f-phone" type="tel" placeholder="+1 (000) 000-0000" autocomplete="off">
+        </div>
+        <div class="field">
+          <label for="f-project">Project Type</label>
+          <input id="f-project" type="text" placeholder="Portrait, event, commercial…" autocomplete="off">
+        </div>
+        <div class="field">
+          <label>Budget</label>
+          <div class="budget-options">
+            <label class="opt"><input type="radio" name="budget" value="<500"><span>Under $500</span></label>
+            <label class="opt"><input type="radio" name="budget" value="<1000"><span>Under $1,000</span></label>
+            <label class="opt"><input type="radio" name="budget" value="<1500"><span>Under $1,500</span></label>
+            <div class="opt-group">
+              <label class="opt"><input type="radio" name="budget" value="<2000"><span>Under $2,000</span></label>
+              <label class="opt"><input type="radio" name="budget" value="2000+"><span>$2,000 or more</span></label>
+            </div>
+          </div>
+        </div>
+      </form>
+        <button type="submit" class="book-submit">Send Request</button>
+    </div>
+  </section>
+
+  <!-- ── FOOTER ── -->
+  <footer>
+    <div class="footer-logo">ZAM Photo</div>
+    <div class="footer-right">
+      <p>© 2026 All rights reserved</p>
+      <p>Photography</p>
+    </div>
+  </footer>
+
+  <script>
+    // ── HERO FADE + TYPEWRITER ──
+    const hero      = document.querySelector('.hero');
+    const typed     = document.getElementById('typed');
+    const cursor    = document.querySelector('.cursor');
+    const scrollTxt = document.getElementById('scrollTxt');
+    const fullText = 'ZAM\nPhoto';
+    let   charIdx  = 0;
+
+    // fade hero in immediately
+    requestAnimationFrame(() => hero.classList.add('visible'));
+
+    // start typing after hero + title have faded in (0.4s delay + a little buffer)
+    setTimeout(() => {
+      cursor.style.display = 'inline-block';
+      function type() {
+        if (charIdx < fullText.length) {
+          const ch = fullText[charIdx];
+          if (ch === '\n') {
+            typed.appendChild(document.createElement('br'));
+          } else {
+            typed.insertBefore(document.createTextNode(ch), null);
+          }
+          charIdx++;
+          setTimeout(type, charIdx === 1 ? 400 : 370);
+        } else {
+          scrollTxt.classList.add('visible');
+        }
+      }
+      type();
+    }, 900);
+
+    // ── CURTAIN REVEAL on scroll ──
+    const slots = document.querySelectorAll('.slot');
+
+    const revealObs = new IntersectionObserver((entries) => {
+      entries.forEach((entry, i) => {
+        if (entry.isIntersecting) {
+          // slight stagger for siblings in same row
+          const siblings = [...entry.target.parentElement.querySelectorAll('.slot')];
+          const delay = siblings.indexOf(entry.target) * 120;
+          setTimeout(() => entry.target.classList.add('revealed'), delay);
+          revealObs.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.12 });
+
+    slots.forEach(s => revealObs.observe(s));
+
+    // ── FOOTER reveal ──
+    const footerEls = document.querySelectorAll('.footer-logo, .footer-right');
+    const footerObs = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) { e.target.classList.add('visible'); footerObs.unobserve(e.target); }
+      });
+    }, { threshold: 0.3 });
+    footerEls.forEach(el => footerObs.observe(el));
+
+  </script>
+
+</body>
+</html>
